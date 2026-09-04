@@ -28,40 +28,49 @@ npm test
 
 ## Qué prueba (ejemplo con dummyjson.com, API pública de práctica)
 
-Cinco escenarios que cuentan una historia real de "encadenamiento de
+Seis escenarios que cuentan una historia real de "encadenamiento de
 servicios" — lo mismo que se va a documentar en el AS-IS de Omnicanalidad:
 
-1. **Obtener un token de acceso al iniciar sesión** — se manda usuario y
-   contraseña y la API devuelve un **token de acceso**. Este es el caso
-   crítico (`@critical`): si esto no funciona, nada más funciona.
-2. **Consultar mi perfil con el token obtenido** — el login es la
-   **precondición** (el paso "Dado que..."); la prueba en sí es usar ese
-   token en el header `Authorization` para consultar un endpoint protegido.
-   Sin el token del paso anterior, esta llamada no funcionaría.
-3. **Crear una cuenta para un cliente existente** — otra vez el login como
-   precondición, y además se consulta un cliente que ya existe en el banco
-   y se guarda su identificador; luego se crea una cuenta usando ese mismo
-   identificador como dato de entrada. Es el patrón típico de "Test Data":
-   una API le da a la otra el dato que necesita para poder ejecutarse.
-4. **Rechazar el inicio de sesión con contraseña incorrecta** — caso
-   negativo (`@negativo`): se manda una contraseña equivocada a propósito y
-   se valida que el sistema *no* entregue un token. Un caso negativo que
-   pasa (✅ verde) significa que el sistema protegió bien el acceso.
-5. **Eliminar una cuenta existente** — login + una cuenta ya existente en
-   el banco como precondición; el caso en sí la busca y manda un `DELETE`,
-   y valida que la respuesta la marque como eliminada (`isDeleted: true`).
-   Después hay un último paso que vuelve a consultarla "para dejar
-   evidencia de la validación" — léase la nota de abajo, es importante.
+1. **Auth - Consulta de cliente - Precondición: obtener token** — se manda
+   usuario y contraseña y la API devuelve un **token de acceso**. Este es el
+   caso crítico (`@critical`): si esto no funciona, nada más funciona.
+2. **Auth - Consulta de cliente - Consulta de perfil para extraer datos con
+   token extraído** — el login es la **precondición** (el paso "Dado
+   que..."); la prueba en sí es usar ese token en el header `Authorization`
+   para consultar un endpoint protegido. Sin el token del paso anterior,
+   esta llamada no funcionaría.
+3. **Crear una cuenta existente con perfil obtenido en escenario 2** — otra
+   vez el login como precondición, y además se consulta un cliente que ya
+   existe en el banco y se guarda su identificador; luego se crea una
+   cuenta usando ese mismo identificador como dato de entrada. Es el patrón
+   típico de "Test Data": una API le da a la otra el dato que necesita para
+   poder ejecutarse.
+4. **Prueba negativa - No se puede iniciar sesión con contraseña
+   incorrecta** — caso negativo (`@negativo`): se manda una contraseña
+   equivocada a propósito y se valida que el sistema *no* entregue un
+   token. Un caso negativo que pasa (✅ verde) significa que el sistema
+   protegió bien el acceso.
+5. **Eliminar cuenta creada en paso 3 - evitar creación de múltiple data
+   dummy** — login + una cuenta ya existente en el banco como precondición;
+   el caso en sí la busca y manda un `DELETE`, y valida que la respuesta la
+   marque como eliminada (`isDeleted: true`). Después hay un último paso
+   que vuelve a consultarla "para dejar evidencia de la validación" —
+   léase la nota de abajo, es importante.
 
    **Dos límites reales de dummyjson.com que valen la pena conocer, porque
    moldearon este escenario** (los descubrí corriendo la primera versión y
    viendo el test fallar, así que los dejo documentados para que no
    sorprendan en la próxima vuelta):
-   - **Lo que crea `POST /posts/add` no queda guardado de verdad.** Por eso
-     este caso *no* encadena con el escenario "Crear una cuenta..." — buscar
-     o borrar el id que devuelve esa creación da 404, porque nunca existió
-     de verdad del lado del servidor. Se usa en su lugar una cuenta que sí
-     existe en el banco (el mismo patrón que ya usa "Crear una cuenta...").
+   - **Lo que crea `POST /posts/add` no queda guardado de verdad**, así que
+     este caso, a pesar del nombre, *no puede* encadenarse literalmente con
+     la cuenta del escenario 3 — buscar o borrar el id que devuelve esa
+     creación da 404, porque nunca existió de verdad del lado del servidor.
+     Usa en su lugar una cuenta que sí existe en el banco. Es, de hecho, la
+     misma idea detrás del nombre del caso: reutilizar una cuenta existente
+     en vez de crear una nueva solo para borrarla es justo lo que evita
+     acumular data dummy de más. En Omnicanalidad, con datos que sí
+     persisten, este mismo caso sí podría encadenarse literalmente con la
+     cuenta creada en el escenario 3.
    - **`DELETE` tampoco borra nada de verdad**, solo simula la respuesta
      (por eso el `Post` que devuelve trae `isDeleted: true`, pero si se
      vuelve a consultar el mismo id, sigue apareciendo). La única
@@ -71,6 +80,13 @@ servicios" — lo mismo que se va a documentar en el AS-IS de Omnicanalidad:
      aplica en Omnicanalidad: ahí esa misma consulta se haría contra la base
      de datos real para confirmar que el registro ya no existe — con esta
      API pública no se puede demostrar eso de verdad, solo el patrón.
+6. **Buscar una cuenta existente en la base de datos** — caso propio y
+   visible para la búsqueda, separado del de eliminar: login como
+   precondición, y la acción que se prueba es solo consultar (`GET`) una
+   cuenta que existe, validando que se reciben sus datos completos. (La
+   búsqueda que hace el escenario 5 antes de borrar es interna a ese paso;
+   este caso la deja como su propio "Cuando ... Entonces", con su propia
+   validación.)
 
 Cuando se definan los flujos reales de Omnicanalidad, este ejemplo se
 reemplaza siguiendo la misma estructura (precondición de login → token →
@@ -113,12 +129,15 @@ Cada request/respuesta queda registrado en dos lugares:
   `smoke` = pruebas rápidas esenciales, `critical` = el paso del que depende
   todo lo demás, `negativo` = casos que deben fallar a propósito para
   confirmar que el sistema protege bien el acceso. El nombre del proyecto
-  ("Omnicanalidad") es aparte — no es una etiqueta repetida.
-- El resto de las palabras sueltas de la interfaz ("Run", "Test Steps",
-  "Attachments", "stdout") son parte fija del reporte de Playwright y no se
-  pueden traducir sin reescribir el reportero — no son parte de la prueba en
-  sí, así que para explicarle esto a un no-técnico alcanza con leer los
-  nombres de los escenarios y abrir los "Attachments".
+  ("Proyecto API Omnicanalidad Banco Banrural") es aparte — no es una
+  etiqueta repetida.
+- El resto de las palabras sueltas de la interfaz ("Project:", "Run", "Test
+  Steps", "Attachments", "stdout") son parte fija del reporte de Playwright
+  y no se pueden traducir sin reescribir el reportero — no son parte de la
+  prueba en sí. Lo que sigue después de "Project:" (el nombre del proyecto)
+  sí es 100% nuestro y ya está en español. Para explicarle esto a un
+  no-técnico alcanza con leer los nombres de los escenarios y abrir los
+  "Attachments".
 - **Ambiente**: cada caso, al abrirlo en el reporte, muestra una línea
   "Ambiente: Prueba" junto al título — se lee de `AMBIENTE` en `.env` y sale
   sola en cada test, sin que cada escenario tenga que declararlo. Cuando este

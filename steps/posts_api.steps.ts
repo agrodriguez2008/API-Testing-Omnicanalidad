@@ -73,6 +73,20 @@ Given('que existe una cuenta registrada en el banco', async ({ postsService, ctx
   ctx.setAccountId(ctx.response<Post>().data.id);
 });
 
+// --- Buscar en la base de datos: caso propio, visible en el reporte ---
+// (antes la búsqueda quedaba escondida dentro del step de eliminar; ahora
+// también existe como su propio escenario, con su propio Entonces.)
+
+When('busco una cuenta existente en la base de datos', async ({ postsService, ctx }) => {
+  ctx.setResponse(await postsService.getById(CUENTA_DEMO_ID));
+});
+
+Then('encuentro la cuenta y veo sus datos completos', async ({ ctx }) => {
+  const data = ctx.response<Post>().data;
+  expect(data.id).toBe(CUENTA_DEMO_ID);
+  expect(data.title).toBeTruthy();
+});
+
 When('busco esa cuenta y la elimino', async ({ postsService, ctx }) => {
   // La búsqueda ("¿existe esto en la base de datos?") no es lo que se
   // valida en este step — lo que importa es la respuesta del DELETE.

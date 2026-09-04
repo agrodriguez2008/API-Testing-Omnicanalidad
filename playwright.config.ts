@@ -5,9 +5,11 @@ import { defineBddConfig } from 'playwright-bdd';
  * `bddgen` compila `features/**` + `steps/**` en specs de Playwright bajo
  * `.features-gen`. Ese es el `testDir` real.
  *
- * Proyecto único, 100% API — no abre navegador. Se llama "Omnicanalidad"
- * (en vez de "api") para que en el reporte HTML se vea el nombre real del
- * proyecto, sin repetir la palabra "api" junto con las etiquetas del Gherkin.
+ * Proyecto único, 100% API — no abre navegador. Se llama con el nombre real
+ * del proyecto para que se vea así en el reporte HTML — ojo: la palabra
+ * "Project:" que Playwright pone antes en el reporte es parte fija de su
+ * interfaz (en inglés) y no se puede traducir sin reescribir el reportero;
+ * lo que sí es 100% nuestro y ya está en español es el valor que sigue.
  */
 const testDir = defineBddConfig({
   features: 'features/*.feature',
@@ -25,7 +27,7 @@ export default defineConfig({
   ],
   projects: [
     {
-      name: 'Omnicanalidad',
+      name: 'Proyecto API Omnicanalidad Banco Banrural',
     },
   ],
 });
