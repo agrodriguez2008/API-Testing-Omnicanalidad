@@ -1,12 +1,10 @@
 {
   "name": "playwright-bdd-poc",
   "version": "1.0.0",
-  "description": "Demo POC: Playwright + TypeScript + BDD con arquitectura en capas (page objects, servicio API, fixtures)",
+  "description": "Demo POC: Playwright + TypeScript + BDD para pruebas de API, con arquitectura en capas (servicio API, fixtures)",
   "main": "index.js",
   "scripts": {
-    "test": "npx bddgen && npx playwright test",
-    "test:ui": "npx bddgen && npx playwright test --project=ui",
-    "test:api": "npx bddgen && npx playwright test --project=api"
+    "test": "npx bddgen && npx playwright test"
   },
   "keywords": [],
   "author": "",

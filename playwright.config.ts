@@ -1,11 +1,11 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
-import { env } from './src/config/env';
 
 /**
  * `bddgen` compila `features/**` + `steps/**` en specs de Playwright bajo
- * `.features-gen`. Ese es el `testDir` real — por eso el runner estándar de
- * Playwright (workers, retries, traces, modo UI) sigue funcionando igual.
+ * `.features-gen`. Ese es el `testDir` real.
+ *
+ * Proyecto único: `api` — este proyecto es solo de API, no abre navegador.
  */
 const testDir = defineBddConfig({
   features: 'features/*.feature',
@@ -21,22 +21,9 @@ export default defineConfig({
     ['html', { open: 'never' }],
     ['list'],
   ],
-  use: {
-    baseURL: env.baseUrl,
-    // Sauce Demo trae `data-test` en cada control.
-    testIdAttribute: 'data-test',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-  },
   projects: [
     {
-      name: 'ui',
-      use: { ...devices['Desktop Chrome'] },
-      grep: /@ui/,
-    },
-    {
       name: 'api',
-      // Los escenarios de API nunca abren navegador.
       grep: /@api/,
     },
   ],
