@@ -1,7 +1,0 @@
-# Copia este archivo a .env y ajusta si hace falta.
-
-BASE_URL=https://www.saucedemo.com
-API_URL=https://jsonplaceholder.typicode.com
-
-USER_NAME=standard_user
-USER_PASSWORD=secret_sauce
