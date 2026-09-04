@@ -1,13 +1,17 @@
 import { test as base, createBdd } from 'playwright-bdd';
+import { AuthService } from '@services/auth.service';
+import { UsersService } from '@services/users.service';
 import { PostsService } from '@services/posts.service';
 import { ScenarioContext } from './context';
 
 /**
  * Único lugar del proyecto donde se construye algo. Los steps piden lo que
- * necesitan (`async ({ postsService }) => …`) y nunca hacen `new` ellos mismos.
+ * necesitan (`async ({ authService }) => …`) y nunca hacen `new` ellos mismos.
  */
 export interface TestFixtures {
   ctx: ScenarioContext;
+  authService: AuthService;
+  usersService: UsersService;
   postsService: PostsService;
 }
 
@@ -16,7 +20,13 @@ export const test = base.extend<TestFixtures>({
     await use(new ScenarioContext());
   },
 
-  // No depende de `page`: este proyecto es 100% API, nunca lanza navegador.
+  // Ninguno depende de `page`: este proyecto es 100% API, nunca lanza navegador.
+  authService: async ({}, use) => {
+    await use(new AuthService());
+  },
+  usersService: async ({}, use) => {
+    await use(new UsersService());
+  },
   postsService: async ({}, use) => {
     await use(new PostsService());
   },

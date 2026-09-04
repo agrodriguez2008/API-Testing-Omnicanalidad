@@ -24,5 +24,5 @@ export interface Env {
 }
 
 export const env: Env = {
-  apiUrl: optional('API_URL', 'https://jsonplaceholder.typicode.com'),
+  apiUrl: optional('API_URL', 'https://dummyjson.com'),
 };

@@ -6,6 +6,8 @@ import type { AxiosResponse } from 'axios';
  */
 export class ScenarioContext {
   private lastResponse?: AxiosResponse;
+  private accessToken?: string;
+  private lastUserId?: number;
 
   setResponse(response: AxiosResponse): void {
     this.lastResponse = response;
@@ -18,5 +20,29 @@ export class ScenarioContext {
       );
     }
     return this.lastResponse as AxiosResponse<T>;
+  }
+
+  /** Guarda el token que devolvió el login, para que otro step lo use después. */
+  setToken(token: string): void {
+    this.accessToken = token;
+  }
+
+  token(): string {
+    if (!this.accessToken) {
+      throw new Error('No hay token guardado. ¿Corrió el login antes que este step?');
+    }
+    return this.accessToken;
+  }
+
+  /** Guarda un id devuelto por una API, para que otra llamada lo use como dato. */
+  setUserId(id: number): void {
+    this.lastUserId = id;
+  }
+
+  userId(): number {
+    if (this.lastUserId === undefined) {
+      throw new Error('No hay id de usuario guardado. ¿Corrió el step que lo obtiene antes?');
+    }
+    return this.lastUserId;
   }
 }
