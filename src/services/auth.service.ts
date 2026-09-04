@@ -17,11 +17,20 @@ export class AuthService extends BaseService {
     super({ basePath: '/auth' });
   }
 
-  login(username: string, password: string): Promise<AxiosResponse<LoginResponse>> {
+  login(
+    username: string,
+    password: string,
+    options: { expectFailure?: boolean } = {},
+  ): Promise<AxiosResponse<LoginResponse>> {
     return this.post<LoginResponse>(
       '/login',
       { username, password },
-      { description: `Iniciar sesión en la banca en línea como "${username}"` },
+      {
+        description: options.expectFailure
+          ? `Intentar iniciar sesión como "${username}" con una contraseña incorrecta`
+          : `Iniciar sesión en la banca en línea como "${username}"`,
+        expectFailure: options.expectFailure,
+      },
     );
   }
 

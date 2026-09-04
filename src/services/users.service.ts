@@ -15,6 +15,6 @@ export class UsersService extends BaseService {
   }
 
   getById(id: number): Promise<AxiosResponse<User>> {
-    return this.get<User>(`/${id}`, { description: `Consultar el cliente #${id}` });
+    return this.get<User>(`/${id}`, { description: 'Consultar los datos del cliente en el banco' });
   }
 }

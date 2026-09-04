@@ -15,6 +15,14 @@ interface CallOptions {
    * el reporte, para que cualquiera entienda qué se probó sin leer código.
    */
   description?: string;
+  /**
+   * Marca esta llamada como un caso negativo: se espera que la API
+   * responda con un error (ej. credenciales inválidas). Cambia el resumen
+   * del adjunto para que un status no-2xx se lea como "rechazado
+   * correctamente ✅" en vez de "no exitoso ❌", que confundiría a alguien
+   * que no sea de QA (el test en verde ya dice que el caso pasó).
+   */
+  expectFailure?: boolean;
 }
 
 /**
@@ -42,7 +50,7 @@ export abstract class BaseService {
   }
 
   protected async get<T>(path: string, options: CallOptions = {}): Promise<AxiosResponse<T>> {
-    const { config, description } = options;
+    const { config, description, expectFailure } = options;
     const url = `${this.client.defaults.baseURL}${path}`;
     console.log(`\n[API] → GET ${url}`);
 
@@ -51,7 +59,7 @@ export abstract class BaseService {
     console.log(`[API] ← ${response.status} ${response.statusText}`);
     console.log(`[API] respuesta:`, JSON.stringify(response.data, null, 2));
 
-    await this.attachExchange('GET', url, undefined, response, description);
+    await this.attachExchange('GET', url, undefined, response, description, expectFailure);
 
     return response;
   }
@@ -61,7 +69,7 @@ export abstract class BaseService {
     body: unknown,
     options: CallOptions = {},
   ): Promise<AxiosResponse<T>> {
-    const { config, description } = options;
+    const { config, description, expectFailure } = options;
     const url = `${this.client.defaults.baseURL}${path}`;
     console.log(`\n[API] → POST ${url}`);
     console.log(`[API] payload enviado:`, JSON.stringify(body, null, 2));
@@ -71,7 +79,22 @@ export abstract class BaseService {
     console.log(`[API] ← ${response.status} ${response.statusText}`);
     console.log(`[API] respuesta:`, JSON.stringify(response.data, null, 2));
 
-    await this.attachExchange('POST', url, body, response, description);
+    await this.attachExchange('POST', url, body, response, description, expectFailure);
+
+    return response;
+  }
+
+  protected async delete<T>(path: string, options: CallOptions = {}): Promise<AxiosResponse<T>> {
+    const { config, description, expectFailure } = options;
+    const url = `${this.client.defaults.baseURL}${path}`;
+    console.log(`\n[API] → DELETE ${url}`);
+
+    const response = await this.client.delete<T>(path, config);
+
+    console.log(`[API] ← ${response.status} ${response.statusText}`);
+    console.log(`[API] respuesta:`, JSON.stringify(response.data, null, 2));
+
+    await this.attachExchange('DELETE', url, undefined, response, description, expectFailure);
 
     return response;
   }
@@ -86,13 +109,25 @@ export abstract class BaseService {
     requestBody: unknown,
     response: AxiosResponse,
     description?: string,
+    expectFailure?: boolean,
   ): Promise<void> {
     try {
-      const ok = response.status >= 200 && response.status < 300;
+      const isSuccessStatus = response.status >= 200 && response.status < 300;
+      // En un caso normal, un status 2xx es lo correcto. En un caso negativo
+      // (expectFailure), es al revés: lo correcto es que la API rechace la
+      // llamada, así que un status de error es la señal de que el caso pasó.
+      const resultLine = expectFailure
+        ? isSuccessStatus
+          ? '⚠️ inesperado — la API aceptó una llamada que debía rechazar'
+          : 'rechazado correctamente ✅ (era el resultado esperado)'
+        : isSuccessStatus
+          ? 'correcto ✅'
+          : 'no exitoso ❌';
+
       const summary = [
         description ?? `Llamada ${method} a ${url}`,
         '',
-        `Resultado: ${response.status} ${response.statusText} — ${ok ? 'correcto ✅' : 'no exitoso ❌'}`,
+        `Resultado: ${response.status} ${response.statusText} — ${resultLine}`,
         '',
         '--- Detalle técnico ---',
         `${method} ${url}`,

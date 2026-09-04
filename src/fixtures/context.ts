@@ -8,6 +8,7 @@ export class ScenarioContext {
   private lastResponse?: AxiosResponse;
   private accessToken?: string;
   private lastUserId?: number;
+  private lastAccountId?: number;
 
   setResponse(response: AxiosResponse): void {
     this.lastResponse = response;
@@ -44,5 +45,17 @@ export class ScenarioContext {
       throw new Error('No hay id de usuario guardado. ¿Corrió el step que lo obtiene antes?');
     }
     return this.lastUserId;
+  }
+
+  /** Guarda el id de la cuenta creada, para poder buscarla/eliminarla después. */
+  setAccountId(id: number): void {
+    this.lastAccountId = id;
+  }
+
+  accountId(): number {
+    if (this.lastAccountId === undefined) {
+      throw new Error('No hay id de cuenta guardado. ¿Corrió el step que la crea antes?');
+    }
+    return this.lastAccountId;
   }
 }

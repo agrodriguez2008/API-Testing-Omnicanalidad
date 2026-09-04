@@ -1,7 +1,7 @@
 {
-  "name": "playwright-bdd-poc",
+  "name": "omnicanalidad-api-testing",
   "version": "1.0.0",
-  "description": "Demo POC: Playwright + TypeScript + BDD para pruebas de API, con arquitectura en capas (servicio API, fixtures)",
+  "description": "Omnicanalidad — POC de metodología para pruebas de API con Playwright + TypeScript + BDD, arquitectura en capas (servicio API, fixtures)",
   "main": "index.js",
   "scripts": {
     "test": "npx bddgen && npx playwright test"

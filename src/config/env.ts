@@ -21,8 +21,11 @@ function optional(key: string, fallback: string): string {
 export interface Env {
   /** URL base de la API bajo prueba. */
   readonly apiUrl: string;
+  /** Nombre del ambiente contra el que corren las pruebas (ej. "Prueba", "QA"). Solo para mostrar en el reporte. */
+  readonly ambiente: string;
 }
 
 export const env: Env = {
   apiUrl: optional('API_URL', 'https://dummyjson.com'),
+  ambiente: optional('AMBIENTE', 'Prueba'),
 };
