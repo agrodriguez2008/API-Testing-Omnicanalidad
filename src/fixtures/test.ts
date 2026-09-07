@@ -6,7 +6,7 @@ import { env } from '@config/env';
 import { ScenarioContext } from './context';
 
 /**
- * Único lugar del proyecto donde se construye algo. Los steps piden lo que
+ * Unico lugar del proyecto donde se construye algo. Los steps piden lo que
  * necesitan (`async ({ authService }) => …`) y nunca hacen `new` ellos mismos.
  */
 export interface TestFixtures {
@@ -14,7 +14,7 @@ export interface TestFixtures {
   authService: AuthService;
   usersService: UsersService;
   postsService: PostsService;
-  /** No se pide en ningún step: `auto: true` hace que corra sola en cada test. */
+  /** No se pide en ningun step: `auto: true` hace que corra sola en cada test. */
   ambiente: void;
 }
 
@@ -34,9 +34,9 @@ export const test = base.extend<TestFixtures>({
     await use(new PostsService());
   },
 
-  // Deja "Ambiente: Prueba" (o lo que diga .env) como anotación visible en
+  // Deja "Ambiente: Prueba" (o lo que diga .env) como anotacion visible en
   // el reporte HTML, junto al nombre de cada caso — para que quien lo abra
-  // sepa contra qué ambiente corrió sin tener que preguntar.
+  // sepa contra que ambiente corrio sin tener que preguntar.
   ambiente: [
     async ({}, use, testInfo) => {
       testInfo.annotations.push({ type: 'Ambiente', description: env.ambiente });

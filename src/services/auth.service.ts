@@ -27,8 +27,8 @@ export class AuthService extends BaseService {
       { username, password },
       {
         description: options.expectFailure
-          ? `Intentar iniciar sesión como "${username}" con una contraseña incorrecta`
-          : `Iniciar sesión en la banca en línea como "${username}"`,
+          ? `Intentar iniciar sesion como "${username}" con una contraseña incorrecta`
+          : `Iniciar sesion en la banca en linea como "${username}"`,
         expectFailure: options.expectFailure,
       },
     );
@@ -37,7 +37,7 @@ export class AuthService extends BaseService {
   me(token: string): Promise<AxiosResponse<LoginResponse>> {
     return this.get<LoginResponse>('/me', {
       config: { headers: { Authorization: `Bearer ${token}` } },
-      description: 'Consultar mi perfil de cliente usando el token que devolvió el login',
+      description: 'Consultar mi perfil de cliente usando el token que devolvio el login',
     });
   }
 }
